@@ -1,26 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-
-interface TrainDetails {
-  id: string;
-  number: string;
-  departure: {
-    city: string;
-    time: string;
-    platform: string;
-  };
-  arrival: {
-    city: string;
-    time: string;
-    platform: string;
-  };
-  duration: string;
-  stops: string[];
-}
+import { ScheduleItem } from "./ScheduleList";
+import dayjs from "dayjs";
 
 export function TrainDetails() {
   const { id } = useParams();
-  const [train, setTrain] = useState<TrainDetails | null>(null);
+  const [scheduleItem, setScheduleItem] = useState<ScheduleItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -30,7 +15,7 @@ export function TrainDetails() {
         const response = await fetch(`/api/schedule/${id}`);
         if (!response.ok) throw new Error("Train not found");
         const data = await response.json();
-        setTrain(data);
+        setScheduleItem(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
@@ -43,47 +28,43 @@ export function TrainDetails() {
 
   if (loading) return <div>Loading train details...</div>;
   if (error) return <div>Error: {error}</div>;
-  if (!train) return <div>No train data available</div>;
+  if (!scheduleItem) return <div>No train data available</div>;
 
   return (
     <div className="details">
-      <h2>Train {train.number}</h2>
+      <h2>Train {scheduleItem.train.name}</h2>
       <div className="detail-section">
         <h3>Departure</h3>
         <p>
-          <strong>Station:</strong> {train.departure.city}
+          <strong>City:</strong> {scheduleItem.from.name}
         </p>
         <p>
-          <strong>Time:</strong> {train.departure.time}
-        </p>
-        <p>
-          <strong>Platform:</strong> {train.departure.platform}
+          <strong>Time:</strong>{" "}
+          {dayjs(scheduleItem.departureTime).format("DD/MM/YYYY HH:mm")}
         </p>
       </div>
 
       <div className="detail-section">
         <h3>Arrival</h3>
         <p>
-          <strong>Station:</strong> {train.arrival.city}
+          <strong>City:</strong> {scheduleItem.to.name}
         </p>
         <p>
-          <strong>Time:</strong> {train.arrival.time}
+          <strong>Time:</strong>{" "}
+          {dayjs(scheduleItem.arrivalTime).format("DD/MM/YYYY HH:mm")}
         </p>
         <p>
-          <strong>Platform:</strong> {train.arrival.platform}
+          <strong>Platform:</strong>
         </p>
       </div>
 
       <p>
-        <strong>Journey Duration:</strong> {train.duration}
+        <strong>Journey Duration:</strong> {scheduleItem.durationMinutes}{" "}
+        minutes
       </p>
-
-      <h3>Intermediate Stops:</h3>
-      <ul>
-        {train.stops.map((stop, index) => (
-          <li key={index}>{stop}</li>
-        ))}
-      </ul>
+      <p>
+        <strong>Distance:</strong> {scheduleItem.distanceKm} km
+      </p>
     </div>
   );
 }

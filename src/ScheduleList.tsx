@@ -8,7 +8,7 @@ interface TrainItem {
   description: string;
 }
 
-interface ScheduleItem {
+export interface ScheduleItem {
   id: string;
   durationMinutes: number;
   distanceKm: number;
@@ -71,7 +71,7 @@ export function ScheduleList() {
                 {dayjs(scheduleItem.arrivalTime).format("DD/MM/YYYY HH:mm")}
               </td>
               <td>
-                <Link to={`/schedule/${scheduleItem.id}`}>View</Link>
+                <Link to={`/${scheduleItem.id}`}>View</Link>
               </td>
             </tr>
           ))}
